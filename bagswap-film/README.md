@@ -74,7 +74,7 @@ If `BROWSER_EXECUTABLE` is unset, remove the `--browser-executable` flag from th
 | vo5b.wav | 20.00 s (f1200) | Same bags. | as the bag settles |
 | vo6.wav | 25.00 s (f1500) | Explore the public testnet at use bagswap dot com. | "use bagswap dot com" |
 
-Voice direction: an original adult male British voice, warm, assured and conversational. No trailer delivery and no celebrity imitation. Each line must fit before the next cue; the current takes run 1.1–4.2 s and all end before the next cue.
+Voice direction: an adult female British voice, warm, confident, conversational and expressive, with realistic pauses. No trailer delivery and no celebrity imitation. Each line must fit before the next cue; the current takes run 1.1–4.2 s and all end before the next cue.
 
 ## Scenes
 
