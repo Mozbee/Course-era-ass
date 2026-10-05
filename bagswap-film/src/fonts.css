@@ -1,0 +1,5 @@
+/* Manrope (SIL OFL), bundled locally so renders never touch the network. */
+@font-face { font-family: Manrope; font-weight: 500; font-display: block; src: url(../public/fonts/manrope-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: Manrope; font-weight: 600; font-display: block; src: url(../public/fonts/manrope-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: Manrope; font-weight: 700; font-display: block; src: url(../public/fonts/manrope-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: Manrope; font-weight: 800; font-display: block; src: url(../public/fonts/manrope-latin-800-normal.woff2) format('woff2'); }

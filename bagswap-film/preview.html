@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BagSwap Film Preview</title>
+<link rel="stylesheet" href="./src/fonts.css">
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0B0E16; color: #E2E8F0; font-family: Manrope, system-ui, sans-serif; }
+  main { max-width: 1320px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  p.sub { margin: 0 0 18px; color: #94A3B8; font-size: 14px; }
+  .viewport { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 12px; overflow: hidden; }
+  .viewport.vertical { aspect-ratio: 16 / 9; }
+  #stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
+  button { font: inherit; font-weight: 700; font-size: 14px; color: #fff; background: #1E293B; border: 1px solid #334155; border-radius: 10px; padding: 10px 16px; min-height: 44px; cursor: pointer; }
+  button.primary { background: #2563EB; border-color: #2563EB; }
+  button[aria-pressed="true"] { background: #1D4ED8; border-color: #60A5FA; }
+  input[type=range] { flex: 1 1 320px; accent-color: #3B82F6; min-height: 44px; }
+  .time { font-variant-numeric: tabular-nums; font-size: 14px; color: #CBD5E1; min-width: 190px; }
+  .scenes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .scenes button { font-size: 13px; padding: 8px 12px; }
+  .caption { margin-top: 14px; padding: 14px 16px; border-radius: 12px; background: #111827; border: 1px solid #1F2937; font-size: 15px; line-height: 1.5; }
+  .caption b { color: #93C5FD; }
+</style>
+</head>
+<body>
+<main>
+  <h1>BagSwap — The Next Handoff</h1>
+  <p class="sub">30 s · 60 fps · 1,800 frames · silent browser preview (the score and voice are in the MP4 exports)</p>
+  <div class="viewport" id="vp"><div id="stage"></div></div>
+  <div class="controls">
+    <button class="primary" id="play">Pause</button>
+    <button id="replay">Replay</button>
+    <input type="range" id="scrub" min="0" max="1799" step="1" value="0" aria-label="Timeline">
+    <span class="time" id="time"></span>
+    <button id="fmtL" aria-pressed="true">16:9</button>
+    <button id="fmtV" aria-pressed="false">9:16</button>
+  </div>
+  <div class="scenes" id="scenes"></div>
+  <div class="caption" id="cap"></div>
+</main>
+<script type="module">
+  import { computeFrame, SCENES, FPS, DURATION, FORMATS } from './src/film/core.js';
+  import { TEMPLATE } from './src/film/template.js';
+  import { VO } from './src/film/script.js';
+
+  const fill = (v) => TEMPLATE.replace(/\{\{\s*v\.([\w$]+)\s*\}\}/g, (_, k) => (v[k] === undefined ? '' : String(v[k])));
+  const $ = (id) => document.getElementById(id);
+  let frame = 0, playing = true, fmt = new URLSearchParams(location.search).get('format') || 'landscape';
+  let t0 = performance.now(), base = 0;
+
+  function layout() {
+    const vp = $('vp'), { width, height } = FORMATS[fmt];
+    const k = Math.min(vp.clientWidth / width, vp.clientHeight / height);
+    const st = $('stage');
+    st.style.transform = `translate(${(vp.clientWidth - width * k) / 2}px, 0) scale(${k})`;
+    $('fmtL').setAttribute('aria-pressed', fmt === 'landscape');
+    $('fmtV').setAttribute('aria-pressed', fmt === 'vertical');
+  }
+  function draw() {
+    $('stage').innerHTML = fill(computeFrame(frame, fmt));
+    const fr = Math.floor(frame);
+    $('scrub').value = fr;
+    $('time').textContent = `${(frame / FPS).toFixed(2)} s / 30.00 s · frame ${fr}`;
+    const sc = SCENES.find((s) => fr >= s.from && fr < s.to) || SCENES[5];
+    const vo = VO.filter((l) => l.scene === sc.id).map((l) => l.text).join(' ');
+    $('cap').innerHTML = `<b>${SCENES.indexOf(sc) + 1} · ${sc.name}</b> — VO: “${vo}”`;
+    $('play').textContent = playing ? 'Pause' : 'Play';
+  }
+  function tick(now) {
+    if (playing) {
+      frame = base + ((now - t0) * FPS) / 1000;
+      if (frame >= DURATION - 1) { frame = DURATION - 1; playing = false; }
+    }
+    draw();
+    requestAnimationFrame(tick);
+  }
+  const start = () => { t0 = performance.now(); base = frame; };
+  $('play').onclick = () => { if (frame >= DURATION - 1) frame = 0; playing = !playing; start(); };
+  $('replay').onclick = () => { frame = 0; playing = true; start(); };
+  $('scrub').oninput = (e) => { frame = +e.target.value; playing = false; };
+  $('fmtL').onclick = () => { fmt = 'landscape'; layout(); };
+  $('fmtV').onclick = () => { fmt = 'vertical'; layout(); };
+  SCENES.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.textContent = `${i + 1} · ${s.name}`;
+    b.onclick = () => { frame = s.from; playing = false; };
+    $('scenes').appendChild(b);
+  });
+  window.addEventListener('resize', layout);
+  // Hooks for scripted stills: window.__setFrame(n, format)
+  window.__setFrame = (n, f) => { playing = false; frame = n; if (f) { fmt = f; layout(); } draw(); };
+  if (new URLSearchParams(location.search).has('paused')) playing = false;
+  layout();
+  requestAnimationFrame(tick);
+</script>
+</body>
+</html>
