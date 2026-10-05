@@ -7,7 +7,7 @@ A 30-second product film for BagSwap, the memecoin OTC marketplace on Solana. On
 | Landscape master | 1920 × 1080, 60 fps, 1,800 frames (exactly 30 s) |
 | Vertical social | 1080 × 1920, 60 fps, 1,800 frames, laid out separately (not cropped) |
 | Video | H.264 High, yuv420p (BT.709, TV range), CRF 17, fast-start |
-| Audio | AAC 192 kb/s, 48 kHz stereo: original score, sound design and a placeholder synthetic voice |
+| Audio | AAC 192 kb/s, 48 kHz stereo: original score, sound design and a British female voiceover |
 
 ## What's in this folder
 
@@ -57,9 +57,10 @@ If `BROWSER_EXECUTABLE` is unset, remove the `--browser-executable` flag from th
 ## Audio
 
 - **Score:** original and generated in code by `scripts/make-audio.mjs`, with no samples. It is a 120 BPM D-minor pulse with sub-bass and a filtered pad. It builds toward the handoff and resolves to F major for the call to action. The script also adds interface ticks, card movement, a handoff accent, and a landing and logo flare. The music ducks by about 7.5 dB under each voice line and fades out over the last 1.2 s.
-- **Voice (placeholder):** a synthetic British male voice, Piper TTS `en-gb-alan-low`. `scripts/make-voice.sh` generates it. It is low-fidelity, 16 kHz upsampled to 48 kHz, so treat it as a timing guide.
-  - To use a real take, replace the matching `public/audio/vo/<slot>.wav` with a 48 kHz, 16-bit mono WAV, then run `npm run audio && npm run render`.
-  - Check the voice dataset's licence (`MODEL_CARD`) before using it commercially.
+- **Voice:** a warm, conversational British female voice, built offline with Kokoro TTS v1.0 (Apache-2.0), voice `bf_emma`, by `scripts/make-voice.py` (`npm run voice`).
+  - Each line is assembled phrase by phrase with deliberate pauses (for example "Find a buyer. · Set your price. · Choose your amount."), kept at a natural pace and checked against its cue window.
+  - Pronunciation is pinned with phonemes where needed: "bag swap", "meme-coin", O-T-C as letters, and "use" in the URL as the verb.
+  - To use a recorded take, replace the matching `public/audio/vo/<slot>.wav` (48 kHz, 16-bit mono WAV) and run `npm run audio:replace`. That rebuilds the mix and swaps only the audio in both MP4s, copying the video stream untouched.
 
 ### Voiceover script and slots
 
@@ -73,7 +74,7 @@ If `BROWSER_EXECUTABLE` is unset, remove the `--browser-executable` flag from th
 | vo5b.wav | 20.00 s (f1200) | Same bags. | as the bag settles |
 | vo6.wav | 25.00 s (f1500) | Explore the public testnet at use bagswap dot com. | "use bagswap dot com" |
 
-Voice direction: an original adult male British voice, warm, assured and conversational. No trailer delivery and no celebrity imitation. Each line must fit before the next cue; the current takes run 1.0–3.9 s.
+Voice direction: an original adult male British voice, warm, assured and conversational. No trailer delivery and no celebrity imitation. Each line must fit before the next cue; the current takes run 1.1–4.2 s and all end before the next cue.
 
 ## Scenes
 
